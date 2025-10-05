@@ -1,0 +1,589 @@
+{
+  "tech_stack": [
+    "PHP",
+    "Custom MVC Framework",
+    "MySQL",
+    "PHPUnit"
+  ],
+  "features": [
+    {
+      "name": "Authentication API",
+      "description": "User authentication and authorization system for hospital staff",
+      "files": [
+        "src/Controllers/AuthController.php",
+        "src/Core/Auth.php",
+        "src/Core/Session.php"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Hospital MS - Authentication API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/login": {
+            "post": {
+              "summary": "User login",
+              "parameters": [
+                {
+                  "name": "username",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "/logout": {
+            "post": {
+              "summary": "User logout"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Patient Management API",
+      "description": "Patient registration, information management, and medical records",
+      "files": [
+        "src/Controllers/PatientController.php"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Hospital MS - Patient API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/patients": {
+            "get": {
+              "summary": "Get all patients"
+            },
+            "post": {
+              "summary": "Create new patient",
+              "parameters": [
+                {
+                  "name": "name",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "age",
+                  "in": "formData",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "gender",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "/patients/{id}": {
+            "get": {
+              "summary": "Get patient by ID",
+              "parameters": [
+                {
+                  "name": "id",
+                  "in": "path",
+                  "required": true,
+                  "type": "integer"
+                }
+              ]
+            },
+            "put": {
+              "summary": "Update patient information"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Appointment Management API",
+      "description": "Schedule and manage patient appointments with doctors",
+      "files": [
+        "src/Controllers/AppointmentController.php"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Hospital MS - Appointment API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/appointments": {
+            "get": {
+              "summary": "Get all appointments"
+            },
+            "post": {
+              "summary": "Create new appointment",
+              "parameters": [
+                {
+                  "name": "patient_id",
+                  "in": "formData",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "doctor_id",
+                  "in": "formData",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "appointment_date",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string",
+                  "format": "date"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Admission Management API",
+      "description": "Handle patient admissions and discharge processes",
+      "files": [
+        "src/Controllers/AdmissionController.php"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Hospital MS - Admission API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/admissions": {
+            "get": {
+              "summary": "Get all admissions"
+            },
+            "post": {
+              "summary": "Create new admission",
+              "parameters": [
+                {
+                  "name": "patient_id",
+                  "in": "formData",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "ward_id",
+                  "in": "formData",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "bed_id",
+                  "in": "formData",
+                  "required": true,
+                  "type": "integer"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Staff Management API",
+      "description": "Manage hospital staff including doctors, nurses, and administrators",
+      "files": [
+        "src/Controllers/StaffController.php"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Hospital MS - Staff API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/staff": {
+            "get": {
+              "summary": "Get all staff members"
+            },
+            "post": {
+              "summary": "Create new staff member",
+              "parameters": [
+                {
+                  "name": "name",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "role",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "department",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Billing API",
+      "description": "Handle patient billing, payments, and insurance claims",
+      "files": [
+        "src/Controllers/BillingController.php"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Hospital MS - Billing API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/bills": {
+            "get": {
+              "summary": "Get all bills"
+            },
+            "post": {
+              "summary": "Create new bill",
+              "parameters": [
+                {
+                  "name": "patient_id",
+                  "in": "formData",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "amount",
+                  "in": "formData",
+                  "required": true,
+                  "type": "number"
+                },
+                {
+                  "name": "description",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Pharmacy API",
+      "description": "Manage pharmacy inventory, prescriptions, and medication dispensing",
+      "files": [
+        "src/Controllers/PharmacyController.php"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Hospital MS - Pharmacy API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/pharmacy/medicines": {
+            "get": {
+              "summary": "Get all medicines"
+            },
+            "post": {
+              "summary": "Add new medicine",
+              "parameters": [
+                {
+                  "name": "name",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "quantity",
+                  "in": "formData",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "expiry_date",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string",
+                  "format": "date"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Surgery API",
+      "description": "Manage surgery scheduling, operating rooms, and surgical procedures",
+      "files": [
+        "src/Controllers/SurgeryController.php"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Hospital MS - Surgery API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/surgeries": {
+            "get": {
+              "summary": "Get all surgeries"
+            },
+            "post": {
+              "summary": "Schedule new surgery",
+              "parameters": [
+                {
+                  "name": "patient_id",
+                  "in": "formData",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "surgeon_id",
+                  "in": "formData",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "surgery_date",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string",
+                  "format": "date"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Ward Management API",
+      "description": "Manage hospital wards, room assignments, and capacity",
+      "files": [
+        "src/Controllers/WardController.php"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Hospital MS - Ward API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/wards": {
+            "get": {
+              "summary": "Get all wards"
+            },
+            "post": {
+              "summary": "Create new ward",
+              "parameters": [
+                {
+                  "name": "name",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "capacity",
+                  "in": "formData",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "department",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Bed Management API",
+      "description": "Manage hospital beds, availability, and assignments",
+      "files": [
+        "src/Controllers/BedController.php"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Hospital MS - Bed API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/beds": {
+            "get": {
+              "summary": "Get all beds"
+            },
+            "post": {
+              "summary": "Add new bed",
+              "parameters": [
+                {
+                  "name": "ward_id",
+                  "in": "formData",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "bed_number",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "bed_type",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Supply Management API",
+      "description": "Manage medical supplies, equipment, and inventory",
+      "files": [
+        "src/Controllers/SupplyController.php"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Hospital MS - Supply API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/supplies": {
+            "get": {
+              "summary": "Get all supplies"
+            },
+            "post": {
+              "summary": "Add new supply",
+              "parameters": [
+                {
+                  "name": "name",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "quantity",
+                  "in": "formData",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "supplier",
+                  "in": "formData",
+                  "required": true,
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Business Intelligence API",
+      "description": "Generate reports and analytics for hospital operations",
+      "files": [
+        "src/Controllers/BiController.php"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Hospital MS - BI API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/reports/patients": {
+            "get": {
+              "summary": "Get patient statistics report"
+            }
+          },
+          "/reports/financial": {
+            "get": {
+              "summary": "Get financial report"
+            }
+          },
+          "/reports/occupancy": {
+            "get": {
+              "summary": "Get ward occupancy report"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Dashboard API",
+      "description": "Main dashboard providing overview of hospital operations",
+      "files": [
+        "src/Controllers/DashboardController.php"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Hospital MS - Dashboard API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/dashboard": {
+            "get": {
+              "summary": "Get dashboard overview data"
+            }
+          },
+          "/dashboard/stats": {
+            "get": {
+              "summary": "Get hospital statistics"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Home API",
+      "description": "Home page and general hospital information",
+      "files": [
+        "src/Controllers/HomeController.php"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Hospital MS - Home API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/": {
+            "get": {
+              "summary": "Get home page information"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

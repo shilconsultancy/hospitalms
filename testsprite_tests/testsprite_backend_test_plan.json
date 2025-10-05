@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "authentication api user login",
+    "description": "Test the /login endpoint to verify user login functionality with valid and invalid credentials, ensuring secure authentication and session management."
+  },
+  {
+    "id": "TC002",
+    "title": "authentication api user logout",
+    "description": "Test the /logout endpoint to verify user logout functionality, ensuring session termination and access revocation."
+  },
+  {
+    "id": "TC003",
+    "title": "patient management api create new patient",
+    "description": "Test the POST /patients endpoint to create a new patient with valid and invalid data, verifying data validation and persistence."
+  },
+  {
+    "id": "TC004",
+    "title": "patient management api get patient by id",
+    "description": "Test the GET /patients/{id} endpoint to retrieve patient details by ID, verifying correct data retrieval and error handling for invalid IDs."
+  },
+  {
+    "id": "TC005",
+    "title": "appointment management api create new appointment",
+    "description": "Test the POST /appointments endpoint to schedule a new appointment with valid patient_id, doctor_id, and appointment_date, verifying data validation and storage."
+  },
+  {
+    "id": "TC006",
+    "title": "admission management api create new admission",
+    "description": "Test the POST /admissions endpoint to admit a patient by assigning ward and bed, verifying data validation and admission process."
+  },
+  {
+    "id": "TC007",
+    "title": "staff management api create new staff member",
+    "description": "Test the POST /staff endpoint to add a new staff member with valid name, role, and department, verifying data validation and persistence."
+  },
+  {
+    "id": "TC008",
+    "title": "billing api create new bill",
+    "description": "Test the POST /bills endpoint to create a new bill for a patient with valid amount and description, verifying billing data accuracy and storage."
+  },
+  {
+    "id": "TC009",
+    "title": "pharmacy api add new medicine",
+    "description": "Test the POST /pharmacy/medicines endpoint to add a new medicine with valid name, quantity, and expiry_date, verifying inventory update and validation."
+  },
+  {
+    "id": "TC010",
+    "title": "surgery api schedule new surgery",
+    "description": "Test the POST /surgeries endpoint to schedule a new surgery with valid patient_id, surgeon_id, and surgery_date, verifying scheduling and data integrity."
+  }
+]

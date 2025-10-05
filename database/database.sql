@@ -1,0 +1,247 @@
+-- HospitalMS Database Schema (stub - Phase 1 to be filled)
+CREATE DATABASE IF NOT EXISTS hospital_ms CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE hospital_ms;
+
+-- Users table (auth)
+CREATE TABLE IF NOT EXISTS users (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	email VARCHAR(191) NOT NULL UNIQUE,
+	password VARCHAR(255) NOT NULL,
+	name VARCHAR(191) NOT NULL,
+	is_active TINYINT(1) NOT NULL DEFAULT 1,
+	created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Roles and permissions (stubs)
+CREATE TABLE IF NOT EXISTS roles (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(100) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS permissions (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(150) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS role_user (
+	user_id BIGINT UNSIGNED NOT NULL,
+	role_id BIGINT UNSIGNED NOT NULL,
+	PRIMARY KEY (user_id, role_id),
+	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+	FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS permission_role (
+	permission_id BIGINT UNSIGNED NOT NULL,
+	role_id BIGINT UNSIGNED NOT NULL,
+	PRIMARY KEY (permission_id, role_id),
+	FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE,
+	FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+-- Seed admin role and user
+INSERT INTO roles (name) VALUES ("admin") ON DUPLICATE KEY UPDATE name = name;
+INSERT INTO permissions (name) VALUES ("access_dashboard") ON DUPLICATE KEY UPDATE name = name;
+
+INSERT INTO users (email, password, name, is_active)
+VALUES ("admin@hospital.local", "$2y$12$.BJSdgOalzKcW2DYynUve.e8eKNV.Nqa9L6rIj9sjcIoIaJfBYrum", "Administrator", 1)
+ON DUPLICATE KEY UPDATE email = email;
+
+-- Link admin user to admin role and grant permission
+INSERT INTO role_user (user_id, role_id)
+SELECT u.id, r.id FROM users u, roles r WHERE u.email = "admin@hospital.local" AND r.name = "admin"
+ON DUPLICATE KEY UPDATE user_id = user_id;
+
+INSERT INTO permission_role (permission_id, role_id)
+SELECT p.id, r.id FROM permissions p, roles r WHERE p.name = "access_dashboard" AND r.name = "admin"
+ON DUPLICATE KEY UPDATE permission_id = permission_id;
+-- Core domain tables
+
+-- Staff (generic staff table linked to users)
+CREATE TABLE IF NOT EXISTS staff (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	user_id BIGINT UNSIGNED NULL,
+	first_name VARCHAR(100) NOT NULL,
+	last_name VARCHAR(100) NOT NULL,
+	email VARCHAR(191) NULL,
+	phone VARCHAR(50) NULL,
+	position VARCHAR(100) NULL,
+	license_no VARCHAR(100) NULL,
+	department VARCHAR(100) NULL,
+	created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- Doctors (subset of staff)
+CREATE TABLE IF NOT EXISTS doctors (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	staff_id BIGINT UNSIGNED NOT NULL,
+	specialty VARCHAR(150) NULL,
+	FOREIGN KEY (staff_id) REFERENCES staff(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Patients
+CREATE TABLE IF NOT EXISTS patients (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	mrn VARCHAR(50) NOT NULL UNIQUE,
+	first_name VARCHAR(100) NOT NULL,
+	last_name VARCHAR(100) NOT NULL,
+	dob DATE NULL,
+	gender ENUM('M','F','O') NULL,
+	phone VARCHAR(50) NULL,
+	email VARCHAR(191) NULL,
+	address VARCHAR(255) NULL,
+	created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Appointments
+CREATE TABLE IF NOT EXISTS appointments (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	patient_id BIGINT UNSIGNED NOT NULL,
+	doctor_id BIGINT UNSIGNED NOT NULL,
+	scheduled_at DATETIME NOT NULL,
+	status ENUM('scheduled','completed','cancelled') NOT NULL DEFAULT 'scheduled',
+	notes TEXT NULL,
+	created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+	FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Bed and Inpatient Management
+CREATE TABLE IF NOT EXISTS wards (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(100) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS beds (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	ward_id BIGINT UNSIGNED NOT NULL,
+	bed_no VARCHAR(50) NOT NULL,
+	status ENUM('available','occupied','maintenance') NOT NULL DEFAULT 'available',
+	UNIQUE KEY ward_bed_unique (ward_id, bed_no),
+	FOREIGN KEY (ward_id) REFERENCES wards(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS admissions (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	patient_id BIGINT UNSIGNED NOT NULL,
+	bed_id BIGINT UNSIGNED NOT NULL,
+	admitted_at DATETIME NOT NULL,
+	discharged_at DATETIME NULL,
+	FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+	FOREIGN KEY (bed_id) REFERENCES beds(id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- Operation Theater (OT)
+CREATE TABLE IF NOT EXISTS surgeries (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	patient_id BIGINT UNSIGNED NOT NULL,
+	doctor_id BIGINT UNSIGNED NOT NULL,
+	title VARCHAR(191) NOT NULL,
+	scheduled_at DATETIME NOT NULL,
+	status ENUM('scheduled','in_progress','completed','cancelled') NOT NULL DEFAULT 'scheduled',
+	FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+	FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Pharmacy
+CREATE TABLE IF NOT EXISTS drugs (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(191) NOT NULL,
+	strength VARCHAR(100) NULL,
+	form VARCHAR(50) NULL,
+	code VARCHAR(100) NULL UNIQUE,
+	reorder_level INT NULL DEFAULT 0
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS prescriptions (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	patient_id BIGINT UNSIGNED NOT NULL,
+	doctor_id BIGINT UNSIGNED NOT NULL,
+	created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+	FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS prescription_items (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	prescription_id BIGINT UNSIGNED NOT NULL,
+	drug_id BIGINT UNSIGNED NOT NULL,
+	dosage VARCHAR(100) NULL,
+	frequency VARCHAR(100) NULL,
+	duration VARCHAR(100) NULL,
+	FOREIGN KEY (prescription_id) REFERENCES prescriptions(id) ON DELETE CASCADE,
+	FOREIGN KEY (drug_id) REFERENCES drugs(id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- Suppliers & Inventory
+CREATE TABLE IF NOT EXISTS suppliers (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(191) NOT NULL,
+	email VARCHAR(191) NULL,
+	phone VARCHAR(50) NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS items (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(191) NOT NULL,
+	category VARCHAR(100) NULL,
+	unit VARCHAR(50) NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS purchase_orders (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	supplier_id BIGINT UNSIGNED NOT NULL,
+	ordered_at DATETIME NOT NULL,
+	status ENUM('draft','ordered','received','cancelled') NOT NULL DEFAULT 'ordered',
+	FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS po_items (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	po_id BIGINT UNSIGNED NOT NULL,
+	item_id BIGINT UNSIGNED NOT NULL,
+	quantity INT NOT NULL,
+	unit_price DECIMAL(10,2) NOT NULL,
+	FOREIGN KEY (po_id) REFERENCES purchase_orders(id) ON DELETE CASCADE,
+	FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS stock_movements (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	item_id BIGINT UNSIGNED NOT NULL,
+	movement_type ENUM('in','out') NOT NULL,
+	quantity INT NOT NULL,
+	reference VARCHAR(191) NULL,
+	created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- Billing
+CREATE TABLE IF NOT EXISTS invoices (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	patient_id BIGINT UNSIGNED NOT NULL,
+	status ENUM('open','paid','void') NOT NULL DEFAULT 'open',
+	created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS invoice_items (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	invoice_id BIGINT UNSIGNED NOT NULL,
+	description VARCHAR(191) NOT NULL,
+	amount DECIMAL(10,2) NOT NULL,
+	FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS payments (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	invoice_id BIGINT UNSIGNED NOT NULL,
+	amount DECIMAL(10,2) NOT NULL,
+	paid_at DATETIME NOT NULL,
+	method VARCHAR(50) NULL,
+	FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
